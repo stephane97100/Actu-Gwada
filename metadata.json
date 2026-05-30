@@ -1,0 +1,6 @@
+{
+  "name": "Actualité Guadeloupe Live",
+  "description": "Suivi en temps réel de l'actualité, circulation, météo, alertes réseaux sociaux et nouvelles vidéos YouTube/TikTok en Guadeloupe.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
