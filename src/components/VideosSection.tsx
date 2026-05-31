@@ -191,7 +191,7 @@ export default function VideosSection({ videos }: VideosSectionProps) {
             </div>
 
             {/* Additional info pane */}
-            <div className="p-6 bg-slate-950/20 overflow-y-auto space-y-4">
+            <div className="p-4 sm:p-6 bg-slate-950/20 overflow-y-auto space-y-4">
               <div className="space-y-2">
                 <h3 className="text-base sm:text-lg font-bold leading-snug">
                   {playingVideo.title}
@@ -215,19 +215,19 @@ export default function VideosSection({ videos }: VideosSectionProps) {
             </div>
 
             {/* Modal actions */}
-            <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+            <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3 text-center">
               <a
                 href={playingVideo.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-emerald-600 font-extrabold text-xs text-white rounded-xl hover:bg-emerald-500 transition duration-150 flex items-center gap-1.5"
+                className="w-full sm:w-auto px-4 py-2 bg-emerald-600 font-extrabold text-xs text-white rounded-xl hover:bg-emerald-500 transition duration-150 flex items-center justify-center gap-1.5"
                 title="Regarder sur la plateforme d'origine"
               >
                 Regarder sur {playingVideo.platform} ↗
               </a>
               <button
                 onClick={() => setPlayingVideo(null)}
-                className="px-4 py-2 text-xs font-black uppercase text-slate-405 text-slate-400 hover:text-white transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-black uppercase text-slate-405 text-slate-400 hover:text-white transition cursor-pointer"
               >
                 Fermer l&apos;aperçu
               </button>

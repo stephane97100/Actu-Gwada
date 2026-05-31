@@ -36,4 +36,11 @@
   .animate-swing {
     animation: swing 0.8s ease-in-out;
   }
+  .custom-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .custom-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

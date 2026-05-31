@@ -62,8 +62,8 @@ export default function NotificationCenter({
       {/* Background Dim Backdrop */}
       <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" onClick={onClose}></div>
 
-      <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col h-full border-l border-slate-100">
+      <div className="absolute inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
+        <div className="w-screen max-w-full sm:max-w-md bg-white shadow-2xl flex flex-col h-full border-l border-slate-100">
           
           {/* Header */}
           <div className="p-6 bg-gradient-to-br from-emerald-900 to-teal-950 text-white relative flex items-center justify-between">

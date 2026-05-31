@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NewsItem } from "../types";
 import { Search, Globe, ChevronRight, Newspaper, Calendar, ArrowUpRight } from "lucide-react";
 
@@ -11,6 +11,10 @@ export default function NewsSection({ news }: NewsSectionProps) {
   const [selectedSource, setSelectedSource] = useState("Tous");
   const [activeArticle, setActiveArticle] = useState<NewsItem | null>(null);
 
+  // Infinite Scroll state
+  const [visibleCount, setVisibleCount] = useState(20);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
   // Extract unique sources for filtering
   const sources = ["Tous", ...Array.from(new Set(news.map((item) => item.source)))];
 
@@ -22,6 +26,36 @@ export default function NewsSection({ news }: NewsSectionProps) {
     const matchesSource = selectedSource === "Tous" || item.source === selectedSource;
     return matchesSearch && matchesSource;
   });
+
+  // Reset visibleCount when filters change
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [search, selectedSource]);
+
+  // Handle intersection scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 20, filteredNews.length));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [filteredNews.length, visibleCount]);
+
+  const slicedNews = filteredNews.slice(0, visibleCount);
 
   return (
     <div className="space-y-6">
@@ -69,7 +103,7 @@ export default function NewsSection({ news }: NewsSectionProps) {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredNews.map((item) => (
+          {slicedNews.map((item) => (
             <article
               key={item.id}
               className="bg-slate-900/55 rounded-2xl border border-slate-800 overflow-hidden shadow-sm hover:border-emerald-500/35 transition duration-200 flex flex-col h-full group"
@@ -121,12 +155,27 @@ export default function NewsSection({ news }: NewsSectionProps) {
         </div>
       )}
 
+      {/* Infinite Scroll target observer */}
+      {filteredNews.length > visibleCount && (
+        <div ref={loadMoreRef} className="py-10 flex flex-col items-center justify-center gap-2">
+          <div className="w-6 h-6 border-2 border-slate-700 border-t-emerald-500 rounded-full animate-spin"></div>
+          <p className="text-xs text-slate-400 font-mono tracking-wider">Chargement d&apos;articles suivants ({visibleCount} / {filteredNews.length})</p>
+        </div>
+      )}
+
+      {/* Reached end marker */}
+      {filteredNews.length > 0 && filteredNews.length <= visibleCount && (
+        <p className="text-center text-xs text-slate-500 font-mono py-8 border-t border-slate-900/30">
+          ✓ Tous les articles disponibles ont été affichés ({filteredNews.length} actus Guadeloupe)
+        </p>
+      )}
+
       {/* Expanded Article Modal */}
       {activeArticle && (
         <div className="fixed inset-0 bg-slate-950/65 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-slate-900 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-800 flex flex-col max-h-[85vh] text-slate-150">
+          <div className="bg-slate-900 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-800 flex flex-col max-h-[90vh] text-slate-150">
             {/* Header info */}
-            <div className="p-6 bg-slate-950 border-b border-slate-800 text-white relative">
+            <div className="p-5 sm:p-6 bg-slate-950 border-b border-slate-800 text-white relative pr-12">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-[10px] font-black uppercase bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 px-2.5 py-0.5 rounded">
                   {activeArticle.source}
@@ -135,19 +184,19 @@ export default function NewsSection({ news }: NewsSectionProps) {
                   {activeArticle.date}
                 </span>
               </div>
-              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-snug">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold tracking-tight text-white leading-snug">
                 {activeArticle.title}
               </h2>
               <button
                 onClick={() => setActiveArticle(null)}
-                className="absolute top-4 right-4 bg-slate-800 hover:bg-slate-705 hover:bg-slate-700 text-white rounded-full p-1.5 transition text-sm font-semibold w-8 h-8 flex items-center justify-center cursor-pointer"
+                className="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-white rounded-full p-1.5 transition text-sm font-semibold w-8 h-8 flex items-center justify-center cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Scrollable Document Content */}
-            <div className="p-6 md:p-8 overflow-y-auto space-y-4 text-slate-300">
+            <div className="p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 text-slate-300">
               <p className="text-xs sm:text-sm font-medium text-slate-100 border-l-4 border-emerald-500 pl-4 py-1 italic bg-slate-950/40 rounded-r-lg">
                 {activeArticle.summary}
               </p>
@@ -158,18 +207,18 @@ export default function NewsSection({ news }: NewsSectionProps) {
             </div>
 
             {/* Modal Footer Controls */}
-            <div className="p-4 bg-slate-950 border-t border-slate-800 flex items-center justify-between">
+            <div className="p-4 bg-slate-950 border-t border-slate-800 flex flex-col sm:flex-row items-center sm:justify-between gap-3 text-center">
               <a
                 href={activeArticle.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 bg-emerald-600 font-extrabold text-xs text-white rounded-xl hover:bg-emerald-500 transition duration-150 flex items-center gap-2 uppercase tracking-wide"
+                className="w-full sm:w-auto px-4 py-2 bg-emerald-600 font-extrabold text-xs text-white rounded-xl hover:bg-emerald-500 transition duration-150 flex items-center justify-center gap-2 uppercase tracking-wide"
               >
                 Voir l&apos;original ↗
               </a>
               <button
                 onClick={() => setActiveArticle(null)}
-                className="px-4 py-2 text-xs font-black uppercase text-slate-400 hover:text-white transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2 text-xs font-black uppercase text-slate-450 hover:text-white transition cursor-pointer"
               >
                 Fermer
               </button>

@@ -5,12 +5,14 @@ import TrafficSection from "./components/TrafficSection";
 import WeatherSection from "./components/WeatherSection";
 import SocialSection from "./components/SocialSection";
 import VideosSection from "./components/VideosSection";
+import TransitSection from "./components/TransitSection";
 import NotificationCenter from "./components/NotificationCenter";
 import { NewsItem, WeatherInfo, TrafficAlert, SocialTrend, LocalVideo, AppNotification, NotificationSettings } from "./types";
-import { Newspaper, Navigation, CloudRain, Flame, Youtube, Settings, Bell, Info, LayoutGrid } from "lucide-react";
+import { Newspaper, Navigation, CloudRain, Flame, Youtube, Settings, Bell, Info, LayoutGrid, Bus } from "lucide-react";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'traffic' | 'weather' | 'social' | 'videos'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'news' | 'traffic' | 'weather' | 'social' | 'videos' | 'transit'>('dashboard');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   
   // App data states
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -47,10 +49,21 @@ export default function App() {
         setSettings(JSON.parse(saved));
       } catch (e) {}
     }
+
+    const savedTheme = localStorage.getItem("gwada_actu_theme") as 'dark' | 'light';
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      setTheme(savedTheme);
+    }
     
     // Core data fetch
     fetchData();
   }, []);
+
+  const handleToggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem("gwada_actu_theme", nextTheme);
+  };
 
   const saveSettings = (newSettings: NotificationSettings) => {
     setSettings(newSettings);
@@ -195,7 +208,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans select-text p-4 sm:p-6">
+    <div className={`min-h-screen flex flex-col font-sans select-text p-4 sm:p-6 transition-all duration-300 ${
+      theme === "dark" 
+        ? "bg-slate-950 text-slate-100" 
+        : "bg-slate-50 text-slate-900"
+    }`}>
       
       <div className="max-w-7xl w-full mx-auto flex flex-col flex-1">
         
@@ -207,10 +224,16 @@ export default function App() {
           groundedWithGemini={groundedWithGemini}
           notificationCount={notifications.filter(n => !n.read).length}
           onOpenNotifications={() => setNotificationOpen(true)}
+          theme={theme}
+          onToggleTheme={handleToggleTheme}
         />
 
         {/* 2. Visual Tab Selection Header */}
-        <nav className="bg-slate-900/40 p-1.5 rounded-2xl border border-slate-800 mb-6">
+        <nav className={`p-1.5 rounded-2xl border mb-6 transition-all duration-300 ${
+          theme === 'dark' 
+            ? 'bg-slate-900/40 border-slate-800' 
+            : 'bg-white border-slate-200 shadow-sm'
+        }`}>
           <div className="flex overflow-x-auto gap-2 custom-scrollbar">
             
             <button
@@ -219,7 +242,9 @@ export default function App() {
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'dashboard'
                   ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <LayoutGrid className="w-4 h-4" />
@@ -232,7 +257,9 @@ export default function App() {
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'news'
                   ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <Newspaper className="w-4 h-4" />
@@ -244,8 +271,10 @@ export default function App() {
               onClick={() => setActiveTab('traffic')}
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'traffic'
-                  ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  ? 'bg-emerald-500 text-slate-955 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <Navigation className="w-4 h-4" />
@@ -258,7 +287,9 @@ export default function App() {
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'weather'
                   ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <CloudRain className="w-4 h-4" />
@@ -271,7 +302,9 @@ export default function App() {
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'social'
                   ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <Flame className="w-4 h-4" />
@@ -284,11 +317,28 @@ export default function App() {
               className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
                 activeTab === 'videos'
                   ? 'bg-emerald-505 bg-emerald-500 text-slate-955 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
               }`}
             >
               <Youtube className="w-4 h-4" />
               Vidéos Gwada (10)
+            </button>
+            
+            <button
+              id="tab-btn-transit"
+              onClick={() => setActiveTab('transit')}
+              className={`flex items-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-black uppercase tracking-wider rounded-xl transition cursor-pointer shrink-0 ${
+                activeTab === 'transit'
+                  ? 'bg-emerald-505 bg-emerald-500 text-slate-955 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                  : theme === 'dark'
+                    ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                    : 'text-slate-600 hover:text-slate-800 hover:bg-slate-100'
+              }`}
+            >
+              <Bus className="w-4 h-4" />
+              Transports
             </button>
             
           </div>
@@ -420,7 +470,7 @@ export default function App() {
                   {/* 4. Social Trends - 7 columns */}
                   <div 
                     onClick={() => setActiveTab('social')}
-                    className="col-span-12 lg:col-span-7 bg-slate-900/60 rounded-3xl p-5 border border-slate-800 flex flex-col justify-between hover:border-indigo-500/30 hover:bg-slate-900 transition cursor-pointer group"
+                    className="col-span-12 md:col-span-7 lg:col-span-7 bg-slate-900/60 rounded-3xl p-5 border border-slate-800 flex flex-col justify-between hover:border-indigo-500/30 hover:bg-slate-900 transition cursor-pointer group"
                   >
                     <div>
                       <div className="flex justify-between items-center mb-4">
@@ -455,7 +505,7 @@ export default function App() {
                   {/* 5. Tours d'eau / Coupures - 5 columns */}
                   <div 
                     onClick={() => setActiveTab('weather')}
-                    className="col-span-12 lg:col-span-5 bg-slate-900/60 rounded-3xl p-5 border border-slate-800 flex flex-col justify-between hover:border-amber-500/30 hover:bg-slate-900 transition cursor-pointer group"
+                    className="col-span-12 md:col-span-5 lg:col-span-5 bg-slate-900/60 rounded-3xl p-5 border border-slate-800 flex flex-col justify-between hover:border-amber-500/30 hover:bg-slate-900 transition cursor-pointer group"
                   >
                     <div>
                       <div className="flex justify-between items-center mb-3">
@@ -483,8 +533,8 @@ export default function App() {
                     </span>
                   </div>
 
-                  {/* 6. Creator Content - 12 columns */}
-                  <div className="col-span-12 bg-slate-900/40 rounded-3xl p-5 border border-slate-800 flex flex-col hover:border-emerald-500/20 transition">
+                  {/* 6. Creator Content - 8 columns */}
+                  <div className="col-span-12 lg:col-span-8 bg-slate-900/40 rounded-3xl p-5 border border-slate-800 flex flex-col hover:border-emerald-500/20 transition">
                     <div className="flex justify-between items-end mb-4 flex-wrap gap-2">
                       <div>
                         <h2 className="text-xs font-black uppercase tracking-widest text-emerald-400">Dernières vidéos des créateurs</h2>
@@ -527,6 +577,43 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* 7. Bus & Itineraries Shortcut Card - 4 columns */}
+                  <div 
+                    onClick={() => setActiveTab('transit')}
+                    className="col-span-12 lg:col-span-4 bg-gradient-to-br from-indigo-950/40 to-slate-900 rounded-3xl p-5 border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 hover:bg-slate-900 transition cursor-pointer group"
+                  >
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center gap-2">
+                          <Bus className="w-4 h-4 text-indigo-400 group-hover:animate-bounce" />
+                          <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-400">Réseau Gwada Bus</h2>
+                        </div>
+                        <span className="text-[9px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase font-bold tracking-wider">Planificateur</span>
+                      </div>
+                      
+                      <p className="text-xs text-slate-300 leading-relaxed mb-4">
+                        Calculez instantanément vos itinéraires entre les communes en transports en commun (Réseaux Karulis, Mouv'on Région, etc.).
+                      </p>
+
+                      <div className="bg-slate-950/50 rounded-2xl p-3 border border-slate-850 space-y-2.5">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-250">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>Pointe-à-Pitre (Gare Bergevin)</span>
+                        </div>
+                        <div className="border-l border-dashed border-slate-800 h-3 ml-1" />
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-250">
+                          <div className="w-2 h-2 rounded-full bg-rose-500" />
+                          <span>Saint-François (Plages / Marina)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-850 mt-4 flex items-center justify-between text-[10px] text-indigo-400 font-bold uppercase tracking-widest">
+                      <span>Simuler un parcours</span>
+                      <span className="group-hover:translate-x-1 transition">Tracer l'itinéraire →</span>
+                    </div>
+                  </div>
+
                 </div>
               )}
               {activeTab === 'news' && <NewsSection news={news} />}
@@ -534,6 +621,7 @@ export default function App() {
               {activeTab === 'weather' && weather && <WeatherSection weather={weather} />}
               {activeTab === 'social' && <SocialSection trends={socialTrends} />}
               {activeTab === 'videos' && <VideosSection videos={localVideos} />}
+              {activeTab === 'transit' && <TransitSection />}
             </div>
           )}
         </main>
